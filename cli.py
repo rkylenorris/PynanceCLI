@@ -17,7 +17,15 @@ def cli():
 @click.option('--expense', is_flag=True, help='Mark this transaction as an expense')
 def add(amount: float, category: str, d: str,
         income: bool, expense: bool) -> None:
-
+    """
+    adds a transaction to finance tracker object
+    :param amount: float
+    :param category: str
+    :param d: str
+    :param income: bool
+    :param expense: bool
+    :return:
+    """
     if income and expense:
         click.echo("Error: can only have one transaction type, "
                    "either income or expense")
@@ -37,11 +45,19 @@ def add(amount: float, category: str, d: str,
 
 @cli.command()
 def view() -> None:
+    """
+    prints the list of transactions in a readable format
+    :return:
+    """
     tracker.view_transactions()
 
 
 @cli.command()
 def summary() -> None:
+    """
+    shows a summary of the transactions and savings in readable format
+    :return:
+    """
     tracker.view_summary()
 
 
