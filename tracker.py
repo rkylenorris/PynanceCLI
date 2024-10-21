@@ -63,7 +63,7 @@ class Pynance:
         print("  \tAmount | Datetime | Type | Category | Description")
         for i, tran in enumerate(self.transactions):
             counter = i + 1
-            print(f"{counter}:\t{tran['amount']} | "
+            print(f"{counter}:\t${tran['amount']} | "
                   f"{tran['creation_datetime']} | "
                   f"{TransactionType(tran['transaction_type']).name} | "
                   f"{tran['category']} | "
