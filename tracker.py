@@ -1,4 +1,6 @@
 import json
+import matplotlib.pyplot as plt
+import seaborn as sns
 from datetime import datetime
 from enum import Enum
 
@@ -118,3 +120,19 @@ class Pynance:
         print(f"Total Expense: ${total_expense} - Count: {count_expense}")
         print(f'Current Balance: ${self.total}')
         print("----------END SUMMARY----------")
+
+    def visualize_by_category(self):
+        expense = [trans for trans in self.transactions if
+                   trans['transaction_type'] == TransactionType.expense.value]
+        cats = {}
+        for trans in expense:
+            cats[trans['category']] = (cats.get(trans['category'], 0) +
+                                       trans['amount'])
+        plt.figure(figsize=(10, 10))
+        plt.pie(cats.values(), labels=cats.keys(), autopct='%1.1f%%',
+                colors=sns.color_palette('pastel'))
+        plt.axis('equal')
+        plt.title(f"Expense Transactions by Category")
+        plt.show()
+        plt.waitforbuttonpress()
+
