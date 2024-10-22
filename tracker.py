@@ -22,11 +22,11 @@ class Transaction:
                  cat: str = "", desc: str = ""):
         """
         initialises a new transaction object
-        :param amount: float
-        :param timestamp: datetime
-        :param transaction_type: TransactionType
-        :param cat: str
-        :param desc: str
+        :param amount: float: money amount
+        :param timestamp: datetime: datetime transaction occurred
+        :param transaction_type: TransactionType: income or expense
+        :param cat: str: category of transaction
+        :param desc: str: description of transaction
         """
         self.amount: float = amount
         self.creation_datetime = timestamp.strftime('%Y-%m-%d %H:%M:%S')
@@ -122,17 +122,26 @@ class Pynance:
         print("----------END SUMMARY----------")
 
     def visualize_by_category(self):
+        """
+        method for creating pie chart of expenses by category
+
+        :return:
+        """
+        # get expense transactions only
         expense = [trans for trans in self.transactions if
                    trans['transaction_type'] == TransactionType.expense.value]
+
+        # group by category using dictionary
         cats = {}
         for trans in expense:
             cats[trans['category']] = (cats.get(trans['category'], 0) +
                                        trans['amount'])
+
+        # draw plot
         plt.figure(figsize=(10, 10))
-        plt.pie(cats.values(), labels=cats.keys(), autopct='%1.1f%%',
+        plt.pie(list(cats.values()), labels=list(cats.keys()), autopct='%1.1f%%',
                 colors=sns.color_palette('pastel'))
         plt.axis('equal')
         plt.title(f"Expense Transactions by Category")
         plt.show()
         plt.waitforbuttonpress()
-
