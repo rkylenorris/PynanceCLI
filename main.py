@@ -21,7 +21,7 @@ if __name__ == '__main__':
     tracker.view_transactions()
 
     print("\n-----view summary-----")
-    tracker.view_summary()
+    tracker.get_summary()
 
     print("\n-----end------")
 

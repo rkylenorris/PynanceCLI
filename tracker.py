@@ -31,8 +31,8 @@ class Transaction:
         self.amount: float = amount
         self.creation_datetime = timestamp.strftime('%Y-%m-%d %H:%M:%S')
         self.transaction_type = transaction_type.value
-        self.category = cat
-        self.description = desc
+        self.category = cat.title() if cat else ""
+        self.description = desc.lower() if desc else ""
 
 
 class Pynance:
@@ -101,10 +101,10 @@ class Pynance:
                   f"{tran['category']} | "
                   f"{tran['description']}")
 
-    def view_summary(self) -> None:
+    def get_summary(self) -> dict:
         """
-        prints summary of the tracker, including transaction total amount
-        and count divided by type, and the running balance
+        returns summary of the tracker, including transaction total amount
+        and count and the running balance
         :return:
         """
         income = [trans['amount'] for trans in self.transactions if
@@ -115,11 +115,14 @@ class Pynance:
         count_income = len(income)
         total_expense = sum(expense)
         count_expense = len(expense)
-        print("----------SUMMARY----------")
-        print(f"Total Income: ${total_income} - Count: {count_income}")
-        print(f"Total Expense: ${total_expense} - Count: {count_expense}")
-        print(f'Current Balance: ${self.total}')
-        print("----------END SUMMARY----------")
+
+        return {
+            "total_income": total_income,
+            "count_income": count_income,
+            "total_expense": total_expense,
+            "count_expense": count_expense,
+            "total": self.total
+        }
 
     def visualize_expenses(self):
         """
@@ -143,4 +146,16 @@ class Pynance:
                 colors=sns.color_palette('pastel'))
         plt.axis('equal')
         plt.title(f"Expense Transactions by Category")
+        plt.show()
+
+    def visualize_income_v_expenses(self):
+        summary = self.get_summary()
+
+        labels = ['Income', 'Expense']
+        values = [summary['total_income'], summary['total_expenses']]
+
+        plt.figure(figsize=(10, 10))
+        plt.bar(labels, values, color=['green', 'red'])
+        plt.title("Income vs Expenses")
+        plt.ylabel("Amount $")
         plt.show()

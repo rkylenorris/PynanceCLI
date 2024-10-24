@@ -58,8 +58,12 @@ def summary() -> None:
     shows a summary of the transactions and savings in readable format
     :return:
     """
-    tracker.view_summary()
-
+    sum = tracker.get_summary()
+    print("----------SUMMARY----------")
+    print(f"Total Income: ${sum['total_income']} - Count: {sum['count_income']}")
+    print(f"Total Expense: ${sum['total_expense']} - Count: {sum['count_expense']}")
+    print(f'Current Balance: ${sum['total']}')
+    print("----------END SUMMARY----------")
 
 @cli.command()
 def vis_exp():
