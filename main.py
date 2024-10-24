@@ -24,3 +24,7 @@ if __name__ == '__main__':
     tracker.view_summary()
 
     print("\n-----end------")
+
+    tracker.visualize_expenses()
+
+    input("\nPress Enter to continue...")

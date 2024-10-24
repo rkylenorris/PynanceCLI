@@ -37,10 +37,10 @@ def add(amount: float, category: str, d: str,
 
     trans_type = TransactionType.income if income else TransactionType.expense
     transaction = Transaction(amount=amount, transaction_type=trans_type,
-                              cat=category, desc=d)
+                              cat=category.title(), desc=d.lower())
     tracker.perform_transaction(transaction)
-    click.echo(f"Transaction ({transaction.category} {trans_type.name} "
-               f"of ${transaction.amount}) added")
+    click.echo(f"Transaction ({trans_type.name} {transaction.category} "
+               f" ${transaction.amount}) added")
 
 
 @cli.command()
@@ -59,6 +59,11 @@ def summary() -> None:
     :return:
     """
     tracker.view_summary()
+
+
+@cli.command()
+def vis_exp():
+    tracker.visualize_expenses()
 
 
 if __name__ == '__main__':

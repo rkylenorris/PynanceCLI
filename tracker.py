@@ -121,7 +121,7 @@ class Pynance:
         print(f'Current Balance: ${self.total}')
         print("----------END SUMMARY----------")
 
-    def visualize_by_category(self):
+    def visualize_expenses(self):
         """
         method for creating pie chart of expenses by category
 
@@ -144,4 +144,3 @@ class Pynance:
         plt.axis('equal')
         plt.title(f"Expense Transactions by Category")
         plt.show()
-        plt.waitforbuttonpress()
