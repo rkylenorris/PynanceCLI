@@ -1,7 +1,6 @@
 # simple python finance tracker
 # author: R. Kyle Norris
 from tracker import Transaction, TransactionType, Pynance
-from datetime import datetime
 from random import randint
 
 if __name__ == '__main__':
@@ -25,6 +24,6 @@ if __name__ == '__main__':
 
     print("\n-----end------")
 
-    tracker.visualize_expenses()
+    tracker.visualize_income_v_expenses()
 
     input("\nPress Enter to continue...")

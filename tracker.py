@@ -152,7 +152,7 @@ class Pynance:
         summary = self.get_summary()
 
         labels = ['Income', 'Expense']
-        values = [summary['total_income'], summary['total_expenses']]
+        values = [summary['total_income'], summary['total_expense']]
 
         plt.figure(figsize=(10, 10))
         plt.bar(labels, values, color=['green', 'red'])
