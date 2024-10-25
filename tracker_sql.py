@@ -1,6 +1,19 @@
 import pandas as pd
 import sqlite3
 from pathlib import Path
+from enum import Enum
+from datetime import datetime
+from sqlalchemy.types import Integer, Float, String, NVARCHAR
+
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+
+class TransactionType(Enum):
+    """
+    enum representing the two possible transaction types
+    """
+    EXPENSE = 0
+    INCOME = 1
 
 
 class PynanceSQL:
@@ -10,11 +23,11 @@ class PynanceSQL:
         self.transactions = self.load_transactions()
 
         self.dtypes = {
-            "amount": float,
-            "created": str,
-            "transaction_type": int,
-            "category": str,
-            "description": str,
+            "amount": Float(precision=2),
+            "created": NVARCHAR(length=255),
+            "transaction_type": Integer(),
+            "category": NVARCHAR(length=255),
+            "description": NVARCHAR(length=255),
         }
 
     def load_transactions(self):
@@ -27,9 +40,44 @@ class PynanceSQL:
 
     def save_transactions(self):
         df = pd.DataFrame(self.transactions)
+
         with sqlite3.connect(self.db_file) as conn:
             df.to_sql('transactions',
                       conn,
                       if_exists='replace',
                       index=False,
-                      dtype=self.dtypes)
+                      # dtype=self.dtypes
+                      )
+
+    def process_transaction(self,
+                            amt: float,
+                            cat: str,
+                            trans_type: TransactionType = TransactionType.EXPENSE,
+                            desc: str = ""
+                            ) -> None:
+        """
+        method to add transaction to database
+        :param amt: amt of transaction
+        :param cat: category of transaction
+        :param trans_type: income or expense
+        :param desc: description of transaction
+        :return:
+        """
+        self.transactions.append({
+            "amount": amt,
+            "created": datetime.now().strftime(DATE_FORMAT),
+            "transaction_type": trans_type.value,
+            "category": cat.title(),
+            "description": desc.lower(),
+        })
+        self.save_transactions()
+
+    def view_transactions(self):
+        print("  \tAmount | Processed | Type | Category | Description")
+        for i, tran in enumerate(self.transactions):
+            counter = i + 1
+            print(f"{counter}:\t${tran['amount']} | "
+                  f"{tran['created']} | "
+                  f"{TransactionType(tran['transaction_type']).name} | "
+                  f"{tran['category']} | "
+                  f"{tran['description']}")
