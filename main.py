@@ -7,13 +7,13 @@ from random import randint
 if __name__ == '__main__':
     tracker = PynanceSQL()
 
-    for expense in ['groceries', 'rent', 'utilities', 'subscriptions']:
-        amount = round(float(randint(750, 6000) / 10),2)
-        tracker.process_transaction(amt=amount, cat=expense)
-
-    tracker.process_transaction(amt=2000, cat='salary',
-                                trans_type=TransactionType.INCOME,
-                                desc="biweekly salary")
+    # for expense in ['groceries', 'rent', 'utilities', 'subscriptions']:
+    #     amount = round(float(randint(750, 6000) / 10),2)
+    #     tracker.process_transaction(amt=amount, cat=expense)
+    #
+    # tracker.process_transaction(amt=2000, cat='salary',
+    #                             trans_type=TransactionType.INCOME,
+    #                             desc="biweekly salary")
 
     # tracker.process_transaction(Transaction(amount=2000,
     #                                         transaction_type=TransactionType.income,
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     #                                         desc="biweekly salary"))
 
     print("\n-----view transactions-----")
-    tracker.view_transactions()
+    # tracker.view_transactions()
     tracker.visualize_exp_by_category()
     # df = pd.DataFrame(tracker.transactions)
     # df['creation_month'] = pd.to_datetime(df.creation_datetime).dt.month_name()

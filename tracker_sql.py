@@ -55,7 +55,8 @@ class PynanceSQL:
                             amt: float,
                             cat: str,
                             trans_type: TransactionType = TransactionType.EXPENSE,
-                            desc: str = ""
+                            desc: str = "",
+                            created: datetime = datetime.now(),
                             ) -> None:
         """
         method to add transaction to database
@@ -67,7 +68,7 @@ class PynanceSQL:
         """
         self.transactions.append({
             "amount": amt,
-            "created": datetime.now().strftime(DATE_FORMAT),
+            "created": created.strftime(DATE_FORMAT),   #  datetime.now().strftime(DATE_FORMAT),
             "transaction_type": trans_type.value,
             "category": cat.title(),
             "description": desc.lower(),
@@ -115,6 +116,6 @@ class PynanceSQL:
         amounts = grouped['amount']
         categories = grouped['category']
         fig, ax = plt.subplots()
-        ax.pie(amounts, labels=categories, autopct='%1.1f%%', wedgeprops=dict(width=0.4))
+        ax.pie(amounts, labels=categories, autopct='%1.1f%%', wedgeprops=dict(width=0.5))
         plt.title("Expense Transactions by Category")
         plt.show()
