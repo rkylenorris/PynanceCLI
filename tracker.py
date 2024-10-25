@@ -1,4 +1,5 @@
 import json
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime
@@ -47,7 +48,7 @@ class Pynance:
         self.data_file = data_file
         data = self.load_data()
         self.transactions = data.get("transactions")
-        self.total = data.get("total")
+        self.total = data.get("total")  # TODO fix so that blank totals get replaced
 
     def load_data(self):
         """
@@ -104,7 +105,7 @@ class Pynance:
     def get_summary(self) -> dict:
         """
         returns summary of the tracker, including transaction total amount
-        and count and the running balance
+        and count per transaction type and the running balance
         :return:
         """
         income = [trans['amount'] for trans in self.transactions if
@@ -123,6 +124,12 @@ class Pynance:
             "count_expense": count_expense,
             "total": self.total
         }
+
+    def get_summary_by_date(self, date: datetime,
+                            groupby: str = "category") -> dict:
+        df = pd.DataFrame(self.transactions)
+        df['creation_month'] = pd.to_datetime(df.creation_datetime).dt.month_name()
+        grouped = df.groupby(groupby)
 
     def visualize_expenses(self):
         """

@@ -2,6 +2,7 @@ import click
 from tracker import Transaction, TransactionType, Pynance
 
 tracker = Pynance()
+# TODO create way of setting the data file to custom location
 
 
 @click.group()
@@ -64,6 +65,7 @@ def summary() -> None:
     print(f"Total Expense: ${sum['total_expense']} - Count: {sum['count_expense']}")
     print(f'Current Balance: ${sum['total']}')
     print("----------END SUMMARY----------")
+
 
 @cli.command()
 def vis_exp():

@@ -1,6 +1,6 @@
 # simple python finance tracker
 # author: R. Kyle Norris
-from tracker import Transaction, TransactionType, Pynance
+from tracker import Transaction, TransactionType, Pynance, pd
 from random import randint
 
 if __name__ == '__main__':
@@ -16,14 +16,19 @@ if __name__ == '__main__':
                                             cat="salary",
                                             desc="biweekly salary"))
 
-    print("\n-----view transactions-----")
-    tracker.view_transactions()
+    # print("\n-----view transactions-----")
+    # tracker.view_transactions()
 
-    print("\n-----view summary-----")
-    tracker.get_summary()
+    df = pd.DataFrame(tracker.transactions)
+    df['creation_month'] = pd.to_datetime(df.creation_datetime).dt.month_name()
+    grouped = df.groupby("creation_month")
+    print(grouped)
 
-    print("\n-----end------")
-
-    tracker.visualize_income_v_expenses()
-
-    input("\nPress Enter to continue...")
+    # print("\n-----view summary-----")
+    # tracker.get_summary()
+    #
+    # print("\n-----end------")
+    #
+    # tracker.visualize_income_v_expenses()
+    #
+    # input("\nPress Enter to continue...")
