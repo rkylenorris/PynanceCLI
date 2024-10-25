@@ -3,7 +3,10 @@ import sqlite3
 from pathlib import Path
 from enum import Enum
 from datetime import datetime
-from sqlalchemy.types import Integer, Float, String, NVARCHAR
+
+from matplotlib import pyplot as plt
+from sqlalchemy.types import Integer, NVARCHAR, REAL
+from sqlalchemy import create_engine
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -18,12 +21,12 @@ class TransactionType(Enum):
 
 class PynanceSQL:
 
-    def __init__(self, db_file='transactions.db'):
+    def __init__(self, db_file='sqlite:///transactions.db'):
         self.db_file = db_file
         self.transactions = self.load_transactions()
 
         self.dtypes = {
-            "amount": Float(precision=2),
+            "amount": REAL(),
             "created": NVARCHAR(length=255),
             "transaction_type": Integer(),
             "category": NVARCHAR(length=255),
@@ -35,19 +38,18 @@ class PynanceSQL:
             return []
         else:
             return pd.read_sql_query(
-                    'SELECT * FROM transactions', self.db_file
-                ).values.tolist()
+                'SELECT * FROM transactions', self.db_file
+            ).values.tolist()
 
     def save_transactions(self):
         df = pd.DataFrame(self.transactions)
-
-        with sqlite3.connect(self.db_file) as conn:
-            df.to_sql('transactions',
-                      conn,
-                      if_exists='replace',
-                      index=False,
-                      # dtype=self.dtypes
-                      )
+        eng = create_engine(self.db_file)
+        df.to_sql('transactions',
+                  eng,
+                  if_exists='replace',
+                  index=False,
+                  dtype=self.dtypes
+                  )
 
     def process_transaction(self,
                             amt: float,
@@ -104,3 +106,15 @@ class PynanceSQL:
                   f"{TransactionType(tran['transaction_type']).name} | "
                   f"{tran['category']} | "
                   f"{tran['description']}")
+
+    def visualize_exp_by_category(self):
+        eng = create_engine(self.db_file)
+        query = f"SELECT * FROM transactions WHERE transaction_type = {TransactionType.EXPENSE.value}"
+        df = pd.read_sql_query(query, eng)
+        grouped = df[['category', 'amount']].groupby('category').sum().reset_index()
+        amounts = grouped['amount']
+        categories = grouped['category']
+        fig, ax = plt.subplots()
+        ax.pie(amounts, labels=categories, autopct='%1.1f%%', wedgeprops=dict(width=0.4))
+        plt.title("Expense Transactions by Category")
+        plt.show()

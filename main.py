@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     print("\n-----view transactions-----")
     tracker.view_transactions()
-
+    tracker.visualize_exp_by_category()
     # df = pd.DataFrame(tracker.transactions)
     # df['creation_month'] = pd.to_datetime(df.creation_datetime).dt.month_name()
     # grouped = df.groupby("creation_month")
