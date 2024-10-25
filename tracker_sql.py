@@ -72,6 +72,29 @@ class PynanceSQL:
         })
         self.save_transactions()
 
+    def get_summary_data(self):
+
+        income = [trans['amount'] for trans in self.transactions if
+                  trans['transaction_type'] == TransactionType.INCOME.value]
+        expense = [trans['amount'] for trans in self.transactions if
+                   trans['transaction_type'] == TransactionType.EXPENSE.value]
+
+        return {
+            "IncomeTotal": sum(income),
+            "IncomeCount": len(income),
+            "ExpenseTotal": sum(expense),
+            "ExpenseCount": len(expense),
+            "CurrentBalance": sum(income) - sum(expense),
+        }
+
+    def view_summary(self):
+        data = self.get_summary_data()
+        print("----------SUMMARY----------")
+        print(f"Income Total: ${data['IncomeTotal']} - Income Count: {data['IncomeCount']}")
+        print(f"Expense Total: ${data['ExpenseTotal']} - Expense Count: {data['ExpenseCount']}")
+        print(f'Current Balance: ${data['CurrentBalance']}')
+        print("----------END SUMMARY----------")
+
     def view_transactions(self):
         print("  \tAmount | Processed | Type | Category | Description")
         for i, tran in enumerate(self.transactions):
