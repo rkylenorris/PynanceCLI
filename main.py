@@ -1,11 +1,11 @@
 # simple python finance tracker
 # author: R. Kyle Norris
-from tracker_sql import TransactionType, PynanceSQL, pd
+from tracker_sql import TransactionType, Pynance, pd
 from random import randint
 
 
 if __name__ == '__main__':
-    tracker = PynanceSQL()
+    tracker = Pynance()
 
     # for expense in ['groceries', 'rent', 'utilities', 'subscriptions']:
     #     amount = round(float(randint(750, 6000) / 10),2)

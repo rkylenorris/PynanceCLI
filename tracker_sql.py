@@ -1,5 +1,4 @@
 import pandas as pd
-import sqlite3
 from pathlib import Path
 from enum import Enum
 from datetime import datetime
@@ -19,7 +18,7 @@ class TransactionType(Enum):
     INCOME = 1
 
 
-class PynanceSQL:
+class Pynance:
 
     def __init__(self, db_file='sqlite:///transactions.db'):
         self.db_file = db_file
@@ -55,8 +54,7 @@ class PynanceSQL:
                             amt: float,
                             cat: str,
                             trans_type: TransactionType = TransactionType.EXPENSE,
-                            desc: str = "",
-                            created: datetime = datetime.now(),
+                            desc: str = ""
                             ) -> None:
         """
         method to add transaction to database
@@ -68,7 +66,7 @@ class PynanceSQL:
         """
         self.transactions.append({
             "amount": amt,
-            "created": created.strftime(DATE_FORMAT),   #  datetime.now().strftime(DATE_FORMAT),
+            "created": datetime.now().strftime(DATE_FORMAT),
             "transaction_type": trans_type.value,
             "category": cat.title(),
             "description": desc.lower(),
@@ -95,7 +93,7 @@ class PynanceSQL:
         print("----------SUMMARY----------")
         print(f"Income Total: ${data['IncomeTotal']} - Income Count: {data['IncomeCount']}")
         print(f"Expense Total: ${data['ExpenseTotal']} - Expense Count: {data['ExpenseCount']}")
-        print(f'Current Balance: ${data['CurrentBalance']}')
+        print(f'Current Balance: ${data["CurrentBalance"]}')
         print("----------END SUMMARY----------")
 
     def view_transactions(self):
@@ -116,6 +114,24 @@ class PynanceSQL:
         amounts = grouped['amount']
         categories = grouped['category']
         fig, ax = plt.subplots()
+        ax.pie(amounts, labels=categories, autopct='%1.1f%%', wedgeprops=dict(width=0.5))
+        plt.title("Expense Transactions by Category")
+        plt.show()
+
+
+class PynanceVis:
+
+    def __init__(self, tracker: Pynance):
+        self.tracker = tracker
+
+    def expense_by_category(self):
+        eng = create_engine(self.tracker.db_file)
+        query = f"SELECT * FROM transactions WHERE transaction_type = {TransactionType.EXPENSE.value}"
+        df = pd.read_sql_query(query, eng)
+        grouped = df[['category', 'amount']].groupby('category').sum().reset_index()
+        amounts = grouped['amount']
+        categories = grouped['category']
+        _, ax = plt.subplots()
         ax.pie(amounts, labels=categories, autopct='%1.1f%%', wedgeprops=dict(width=0.5))
         plt.title("Expense Transactions by Category")
         plt.show()
