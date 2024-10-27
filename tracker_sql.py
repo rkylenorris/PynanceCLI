@@ -106,18 +106,6 @@ class Pynance:
                   f"{tran['category']} | "
                   f"{tran['description']}")
 
-    def visualize_exp_by_category(self):
-        eng = create_engine(self.db_file)
-        query = f"SELECT * FROM transactions WHERE transaction_type = {TransactionType.EXPENSE.value}"
-        df = pd.read_sql_query(query, eng)
-        grouped = df[['category', 'amount']].groupby('category').sum().reset_index()
-        amounts = grouped['amount']
-        categories = grouped['category']
-        fig, ax = plt.subplots()
-        ax.pie(amounts, labels=categories, autopct='%1.1f%%', wedgeprops=dict(width=0.5))
-        plt.title("Expense Transactions by Category")
-        plt.show()
-
 
 class PynanceVis:
 
@@ -125,12 +113,17 @@ class PynanceVis:
         self.tracker = tracker
 
     def expense_by_category(self):
+        # create engine and query
         eng = create_engine(self.tracker.db_file)
         query = f"SELECT * FROM transactions WHERE transaction_type = {TransactionType.EXPENSE.value}"
+        # use pandas to query db for expense transactions
         df = pd.read_sql_query(query, eng)
+        # group by category, sum amount
         grouped = df[['category', 'amount']].groupby('category').sum().reset_index()
+        # break the amounts and the categories out
         amounts = grouped['amount']
         categories = grouped['category']
+        # create visualization
         _, ax = plt.subplots()
         ax.pie(amounts, labels=categories, autopct='%1.1f%%', wedgeprops=dict(width=0.5))
         plt.title("Expense Transactions by Category")
