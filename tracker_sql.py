@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 from enum import Enum
 from datetime import datetime
-
+import numpy as np
 from matplotlib import pyplot as plt
 from sqlalchemy.types import Integer, NVARCHAR, REAL
 from sqlalchemy import create_engine
@@ -127,4 +127,37 @@ class PynanceVis:
         _, ax = plt.subplots()
         ax.pie(amounts, labels=categories, autopct='%1.1f%%', wedgeprops=dict(width=0.5))
         plt.title("Expense Transactions by Category")
+        plt.show()
+
+    def income_vs_expense_by_month(self):
+        eng = create_engine(self.tracker.db_file)
+        query = f"SELECT * FROM transactions WHERE transaction_type in (0, 1);"
+        df = pd.read_sql_query(query, eng)
+        df['created'] = pd.to_datetime(df['created']).dt.strftime('%Y-%m')
+        income = df[df['transaction_type'] == TransactionType.INCOME.value][
+            ['created', 'amount']
+        ].groupby('created').sum().reset_index()
+        expense = df[df['transaction_type'] == TransactionType.EXPENSE.value][
+            ['created', 'amount']
+        ].groupby('created').sum().reset_index()
+
+        months = income['created']
+        income_data = income['amount']
+        expense_data = expense['amount']
+
+        x = np.arange(len(months))
+
+        width = 0.35
+
+        _, ax = plt.subplots()
+
+        rects1 = ax.bar(x - width / 2, income_data, width, label='Income', color='green')
+        rects2 = ax.bar(x + width / 2, expense_data, width, label='Expenses', color='red')
+        ax.set_xticks(x)
+        ax.set_xticklabels(months)
+        ax.set_ylabel('Amount')
+        ax.set_title('Income vs Expenses by Month')
+
+        ax.legend()
+
         plt.show()
