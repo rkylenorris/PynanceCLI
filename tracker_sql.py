@@ -6,6 +6,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 from sqlalchemy.types import Integer, NVARCHAR, REAL
 from sqlalchemy import create_engine
+from openpyxl import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
+from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl.worksheet.table import Table, TableStyleInfo
+from dateutil.relativedelta import relativedelta
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -161,3 +166,69 @@ class PynanceVis:
         ax.legend()
 
         plt.show()
+
+
+class PynanceReport:
+
+    def __init__(self, tracker: Pynance, title='TransactionsReport'):
+        self.tracker = tracker
+        eng = create_engine(self.tracker.db_file)
+        today = datetime.now()
+        three_months_back = (today - relativedelta(months=3)).replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0
+        ).strftime(DATE_FORMAT)
+        today = today.strftime(DATE_FORMAT)
+        start_date = three_months_back.split(' ')[0]
+        query = f"SELECT * FROM transactions WHERE transaction_type in (0, 1) and date([created]) >= date({start_date});"
+        self.df = pd.read_sql_query(query, eng)
+        self.df['created'] = pd.to_datetime(self.df['created'])
+        end_date = max(self.df['created']).strftime(DATE_FORMAT).split(' ')[0]
+        self.xlsx_path = Path(Path().home() / f'{title}_{start_date.replace('-','')}_{end_date.replace('-','')}.xlsx')
+        self.workbook = Workbook()
+
+    def __df_shape_to_xl_range(self, df: pd.DataFrame, start_col: str = 'A',
+                               start_row: int = 1):
+        end_col = chr(ord('A') + (len(df.columns) - 1))
+        end_row = df.shape[0] + start_row
+        return f'{start_col}{start_row}:{end_col}{end_row}'
+
+    def __convert_range_to_table(self, xl_range: str, table_name: str, ws: Worksheet):
+        table = Table(displayName=table_name, ref=xl_range)
+        style = TableStyleInfo(
+            name='TableStyleMedium9',
+            showRowStripes=True
+        )
+        table.tableStyleInfo = style
+        ws.add_table(table)
+
+    def __df_to_ws(self, df: pd.DataFrame, ws: Worksheet):
+        for r in dataframe_to_rows(df, index=False, header=True):
+            ws.append(r)
+
+    def create_report(self):
+
+        ws = self.workbook.active
+
+        ws.title = 'Transactions'
+
+        self.__df_to_ws(self.df, ws)
+
+        table_ref = self.__df_shape_to_xl_range(self.df)
+        self.__convert_range_to_table(table_ref, 'Transactions', ws)
+
+        self.workbook.create_sheet(title="ExpensesGrouped")
+        group_ws = self.workbook['ExpensesGrouped']
+
+        expenses = self.df[self.df['transaction_type'] == TransactionType.EXPENSE.value]
+        expenses['month'] = expenses['created'].dt.to_period('M')
+        grouped_df = expenses.groupby(['month', 'category']).agg({'amount': 'sum'}).reset_index()
+        grouped_df['month'] = grouped_df['month'].dt.to_timestamp()
+
+        self.__df_to_ws(grouped_df, group_ws)
+        self.__convert_range_to_table(self.__df_shape_to_xl_range(grouped_df),
+                                      'ExpensesByCategory',
+                                      group_ws)
+
+        self.workbook.save(str(self.xlsx_path))
+        self.workbook.close()
+        print(f'report saved to file path: {str(self.xlsx_path)}')
