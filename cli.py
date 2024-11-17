@@ -1,5 +1,5 @@
 import click
-from tracker import Transaction, TransactionType, Pynance
+from tracker_sql import TransactionType, Pynance, PynanceVis, PynanceReport
 
 tracker = Pynance()
 # TODO create way of setting the data file to custom location
@@ -36,12 +36,12 @@ def add(amount: float, category: str, d: str,
                    "either income or expense")
         return
 
-    trans_type = TransactionType.income if income else TransactionType.expense
-    transaction = Transaction(amount=amount, transaction_type=trans_type,
-                              cat=category.title(), desc=d.lower())
-    tracker.perform_transaction(transaction)
-    click.echo(f"Transaction ({trans_type.name} {transaction.category} "
-               f" ${transaction.amount}) added")
+    trans_type = TransactionType(1) if income else TransactionType(0)
+    tracker.process_transaction(amt=amount, trans_type=trans_type,
+                                cat=category.title(), desc=d.lower())
+
+    click.echo(f"Transaction ({trans_type.name} {category.title()}) "
+               f" ${amount}) added")
 
 
 @cli.command()
@@ -59,17 +59,30 @@ def summary() -> None:
     shows a summary of the transactions and savings in readable format
     :return:
     """
-    sum = tracker.get_summary()
+    smmry = tracker.get_summary_data()
     print("----------SUMMARY----------")
-    print(f"Total Income: ${sum['total_income']} - Count: {sum['count_income']}")
-    print(f"Total Expense: ${sum['total_expense']} - Count: {sum['count_expense']}")
-    print(f'Current Balance: ${sum['total']}')
+    print(f"Total Income: ${smmry['total_income']} - Count: {smmry['count_income']}")
+    print(f"Total Expense: ${smmry['total_expense']} - Count: {smmry['count_expense']}")
+    print(f'Current Balance: ${smmry['total']}')
     print("----------END SUMMARY----------")
 
 
 @cli.command()
 def vis_exp():
-    tracker.visualize_expenses()
+    vis = PynanceVis(tracker)
+    vis.expense_by_category()
+
+
+@cli.command()
+def vis_income_exp():
+    vis = PynanceVis(tracker)
+    vis.income_vs_expense_by_month()
+
+
+@cli.command()
+def create_report():
+    report = PynanceReport(tracker)
+    report.create_report()
 
 
 if __name__ == '__main__':
