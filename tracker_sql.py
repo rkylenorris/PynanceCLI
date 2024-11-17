@@ -178,11 +178,12 @@ class PynanceReport:
             day=1, hour=0, minute=0, second=0, microsecond=0
         ).strftime(DATE_FORMAT)
         start_date = three_months_back.split(' ')[0]
-        query = f"SELECT * FROM transactions WHERE transaction_type in (0, 1) and date([created]) >= date({start_date});"
+        query = (f"SELECT * FROM transactions WHERE transaction_type in (0, 1) "
+                 f"and date([created]) >= date({start_date});")
         self.df = pd.read_sql_query(query, eng)
         self.df['created'] = pd.to_datetime(self.df['created'])
         end_date = max(self.df['created']).strftime(DATE_FORMAT).split(' ')[0]
-        self.xlsx_path = Path(Path().home() / f'{title}_{start_date.replace('-','')}_{end_date.replace('-','')}.xlsx')
+        self.xlsx_path = Path(Path().home() / f'{title}_{start_date.replace('-', '')}_{end_date.replace('-', '')}.xlsx')
         self.workbook = Workbook()
 
     def __df_shape_to_xl_range(self, df: pd.DataFrame, start_col: str = 'A',
