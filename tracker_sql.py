@@ -59,7 +59,8 @@ class Pynance:
                             amt: float,
                             cat: str,
                             trans_type: TransactionType = TransactionType.EXPENSE,
-                            desc: str = ""
+                            desc: str = "",
+                            created = datetime.now().strftime(DATE_FORMAT)
                             ) -> None:
         """
         method to add transaction to database
@@ -71,7 +72,7 @@ class Pynance:
         """
         self.transactions.append({
             "amount": amt,
-            "created": datetime.now().strftime(DATE_FORMAT),
+            "created": created,
             "transaction_type": trans_type.value,
             "category": cat.title(),
             "description": desc.lower(),
