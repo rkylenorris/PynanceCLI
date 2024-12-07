@@ -8,11 +8,11 @@ from tracker_sql import TransactionType, Pynance, datetime, DATE_FORMAT
 import json
 
 
-file_path = "generated_transactions.json"
+file_path = "test/generated_transactions.json"
 with open(file_path, "r") as f:
     transactions = json.load(f)['transactions']
 
-tracker = Pynance(db_file='sqlite:///example_transactions.db')
+tracker = Pynance(db_file='sqlite:///test/example_transactions.db')
 
 for transaction in transactions:
     tracker.process_transaction(
